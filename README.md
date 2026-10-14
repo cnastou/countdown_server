@@ -1,87 +1,132 @@
-# Welcome to React Router!
+# Multi-Client Countdown Server
 
-A modern, production-ready template for building full-stack React applications using React Router.
+A full-stack countdown management application built with **React Router v7 (Remix Framework Mode), React, TypeScript, Node.js, and SQLite**.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+The application provides a centralized dashboard for managing multiple independent client countdown timers, with timer state stored persistently on the server.
 
 ## Features
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- **Independent countdown timers:** Each client has its own duration, status, and deadline.
+- **Client management:** Create, view, and delete clients.
+- **Timer management:** Configure durations, start, pause, resume, and reset timers.
+- **Persistent storage:** SQLite stores client records and countdown state.
+- **Deadline-based countdowns:** Timers calculate remaining time from saved expiration timestamps rather than updating the database every second.
+- **Responsive dashboard:** View and manage multiple timers from one interface.
+- **Server-side data operations:** React Router loaders and actions handle database reads and updates.
 
-## Getting Started
+## Technology Stack
 
-### Installation
+| Technology | Purpose |
+|---|---|
+| React Router v7 | Full-stack application framework |
+| React | Dashboard user interface |
+| TypeScript | Type-safe development |
+| Node.js | Server-side runtime |
+| SQLite | Persistent database |
+| better-sqlite3 | SQLite database access |
+| Vite | Development tooling |
 
-Install the dependencies:
+## Project Structure
+
+```text
+countdown_server/
+├── app/
+│   ├── components/       # Reusable dashboard components
+│   ├── db/               # SQLite connection, schema, repository
+│   ├── hooks/            # Countdown-related React hooks
+│   ├── routes/           # React Router pages and actions
+│   ├── styles/           # Dashboard styling
+│   ├── types/            # TypeScript types
+│   └── utils/            # Timer utilities
+├── data/                 # Local SQLite database (ignored by Git)
+├── package.json
+└── README.md
+```
+
+## Installation
+
+**Requirements:** A supported Node.js version, npm, and a compatible development environment.
+
+Clone the repository:
+
+```bash
+git clone <repository-url>
+cd countdown_server
+```
+
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-### Development
+Initialize the SQLite database:
 
-Start the development server with HMR:
+```bash
+npx tsx app/db/setup.server.ts
+```
+
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+Open the local URL displayed in the terminal, typically:
 
-## Building for Production
+http://localhost:5173
 
-Create a production build:
+## Database Design
 
-```bash
-npm run build
-```
+The SQLite `clients` table stores the state of each countdown.
 
-## Deployment
+| Column | Description |
+|---|---|
+| `id` | Unique client identifier |
+| `name` | Client display name |
+| `seconds` | Saved countdown duration or remaining seconds |
+| `initial_seconds` | Configured duration used for resetting |
+| `status` | `ready`, `running`, `paused`, or `completed` |
+| `ends_at` | Countdown completion timestamp in milliseconds |
 
-### Docker Deployment
+### Countdown Persistence
 
-To build and run using Docker:
+When a timer starts, the server saves its expiration timestamp.
 
-```bash
-docker build -t my-app .
+For example, a timer started at 2:00 PM with a 60-minute duration has a deadline of 3:00 PM.
 
-# Run the container
-docker run -p 3000:3000 my-app
-```
+If the browser closes at 2:20 PM and reopens at 2:45 PM, the remaining time is calculated from the stored deadline: **15 minutes**.
 
-The containerized application can be deployed to any platform that supports Docker, including:
+Each client's countdown is independent. Starting, pausing, or resetting one timer does not change the others.
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
+## Development Status
 
-### DIY Deployment
+**Implemented in the codebase:**
 
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
+- SQLite database initialization
+- Client repository with CRUD operations
+- Countdown start, pause, reset, and completion logic
+- React Router loader for retrieving clients
+- React Router actions for timer operations
+- Countdown dashboard interface
 
-Make sure to deploy the output of `npm run build`
+**Integration testing in progress:** End-to-end verification of the new server-backed dashboard, including browser restart and persistence tests.
 
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
+**Planned improvements:**
 
-## Styling
+- Real-time synchronization across multiple browsers
+- Administrator authentication and authorization
+- Automated tests
+- Improved server-side expiration notifications
+- Deployment configuration
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+## Security Notes
 
----
+Local database files, `.env`, and other development-specific files are excluded from version control.
 
-Built with ❤️ using React Router.
+The application is currently intended for local development. Authentication and authorization must be implemented before exposing timer-management operations publicly.
+
+## License
+
+No license has been specified for this project.
+

@@ -5,3 +5,14 @@
 # React Router
 /.react-router/
 /build/
+
+# SQLite database and local runtime data
+/data/
+
+# VS Code local settings
+/.vscode/
+
+# Exclude SQLite databases in any directory
+*.db
+*.db-wal
+*.db-shm
